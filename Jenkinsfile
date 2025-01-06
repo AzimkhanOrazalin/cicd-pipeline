@@ -49,7 +49,8 @@ pipeline {
       steps {
         script {
           echo 'Building Docker image...'
-          sh 'docker build --platform linux/arm64 -t ${IMAGE_NAME}:latest .'  // Tag the image as "latest"
+          sh 'docker build --platform linux/arm64 -t ${IMAGE_NAME}:latest .'
+          def app = docker.image("${IMAGE_NAME}:latest")
         }
 
       }
@@ -62,6 +63,10 @@ pipeline {
           docker.withRegistry('https://registry.hub.docker.com', 'bf273b9f-a7af-482c-981d-24d87ad00d25') {
             // Push the image with the "latest" tag
             sh 'docker push ${IMAGE_NAME}:latest'
+            
+            def app = docker.image("${IMAGE_NAME}:latest")
+            app.push("${env.BUILD_NUMBER}")
+            app.push('latest')
           }
         }
 
