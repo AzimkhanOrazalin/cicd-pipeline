@@ -8,7 +8,6 @@ pipeline {
           sh 'pwd'
           sh 'ls -l ./scripts'
         }
-
       }
     }
 
@@ -19,7 +18,6 @@ pipeline {
           sh 'whoami'
           sh 'ls -l'
         }
-
       }
     }
 
@@ -30,7 +28,6 @@ pipeline {
           sh 'chmod +x ./scripts/build.sh'
           sh './scripts/build.sh'
         }
-
       }
     }
 
@@ -40,7 +37,6 @@ pipeline {
           echo 'Running tests...'
           sh './scripts/test.sh'
         }
-
       }
     }
 
@@ -51,23 +47,21 @@ pipeline {
           sh "docker build --platform linux/arm64 -t azimazing/${env.IMAGE_NAME}:${env.BUILD_TAG} ."
           sh "docker tag azimazing/${env.IMAGE_NAME}:${env.BUILD_TAG} azimazing/${env.IMAGE_NAME}:latest"
         }
-
       }
     }
 
     stage('Push Docker Image') {
       steps {
         script {
-            echo 'Pushing Docker image to registry...'
-            docker.withRegistry('https://registry.hub.docker.com', 'bf273b9f-a7af-482c-981d-24d87ad00d25'){
-                def app = docker.image("azimazing/${env.IMAGE_NAME}")
-                app.push("${env.BUILD_NUMBER}")
-                app.push('latest')
-            }
+          echo 'Pushing Docker image to registry...'
+          docker.withRegistry('https://registry.hub.docker.com', credentials: "${env.DOCKER_CREDENTIALS_ID}") {
+            def app = docker.image("azimazing/${env.IMAGE_NAME}")
+            app.push("${env.BUILD_NUMBER}")
+            app.push('latest')
+          }
         }
       }
     }
-
   }
   environment {
     IMAGE_NAME = 'testimage'
@@ -88,6 +82,5 @@ pipeline {
       echo 'Cleaning up workspace...'
       cleanWs()
     }
-
   }
 }
