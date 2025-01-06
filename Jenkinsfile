@@ -1,80 +1,89 @@
 pipeline {
-  agent any
-  stages {
-    stage('Verify Workspace and Build Script') {
-      steps {
-        script {
-          echo 'Checking the workspace and build script...'
-          sh 'pwd'  // Print the working directory
-          sh 'ls -l ./scripts'  // List the files in the "scripts" directory
-        }
-
-      }
+    agent any
+    
+    environment {
+        IMAGE_NAME = 'testimage'
+        DOCKER_REGISTRY = 'registry.hub.docker.com'
+        DOCKER_CREDENTIALS = 'bf273b9f-a7af-482c-981d-24d87ad00d25'
     }
-
-    stage('Verify Jenkins User') {
-      steps {
-        script {
-          echo 'Checking the Jenkins user...'
-          sh 'whoami'  // Print the user Jenkins is running as
-          sh 'ls -l'   // List the files in the current directory to check file access
+    
+    stages {
+        stage('Verify Workspace and Build Script') {
+            steps {
+                script {
+                    echo 'Checking the workspace and build script...'
+                    sh 'pwd'
+                    sh 'ls -l ./scripts'
+                }
+            }
         }
-
-      }
-    }
-
-    stage('Build') {
-      steps {
-        script {
-          echo 'Building the application...'
-          // Make sure the build script has execute permissions
-          sh 'chmod +x ./scripts/build.sh'
-          sh './scripts/build.sh'  // Execute the build script
+        
+        stage('Verify Jenkins User') {
+            steps {
+                script {
+                    echo 'Checking the Jenkins user...'
+                    sh 'whoami'
+                    sh 'ls -l'
+                }
+            }
         }
-
-      }
-    }
-
-    stage('Test') {
-      steps {
-        script {
-          echo 'Running tests...'
-          sh './scripts/test.sh'
+        
+        stage('Build') {
+            steps {
+                script {
+                    echo 'Building the application...'
+                    sh 'chmod +x ./scripts/build.sh'
+                    sh './scripts/build.sh'
+                }
+            }
         }
-
-      }
-    }
-
-    stage('Build Docker Image') {
-      steps {
-        script {
-          echo 'Building Docker image...'
-          sh 'docker build --platform linux/arm64 -t ${IMAGE_NAME}:latest .'
-          def app = docker.image("${IMAGE_NAME}:latest")
+        
+        stage('Test') {
+            steps {
+                script {
+                    echo 'Running tests...'
+                    sh './scripts/test.sh'
+                }
+            }
         }
-
-      }
-    }
-
-    stage('Push Docker Image') {
-      steps {
-        script {
-          echo 'Pushing Docker image to registry...'
-          docker.withRegistry('https://registry.hub.docker.com', 'bf273b9f-a7af-482c-981d-24d87ad00d25') {
-            // Push the image with the "latest" tag
-            sh 'docker push ${IMAGE_NAME}:latest'
-            
-            def app = docker.image("${IMAGE_NAME}:latest")
-            app.push("${env.BUILD_NUMBER}")
-            app.push('latest')
-          }
+        
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    echo 'Building Docker image...'
+                    docker.build("${env.IMAGE_NAME}:${env.BUILD_NUMBER}", '--platform linux/arm64 .')
+                }
+            }
         }
-
-      }
+        
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    echo 'Pushing Docker image to registry...'
+                    docker.withRegistry("https://${env.DOCKER_REGISTRY}", env.DOCKER_CREDENTIALS) {
+                        def dockerImage = docker.image("${env.IMAGE_NAME}:${env.BUILD_NUMBER}")
+                        
+                        // Push the build-numbered tag
+                        dockerImage.push()
+                        
+                        // Push the latest tag
+                        dockerImage.push('latest')
+                    }
+                }
+            }
+        }
     }
-
-  }
-  environment {
-    IMAGE_NAME = 'testimage'
-  }
+    
+    post {
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed! Please check the logs for details.'
+        }
+        always {
+            echo 'Cleaning up workspace...'
+            cleanWs()
+        }
+    }
 }
