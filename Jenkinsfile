@@ -3,9 +3,7 @@ pipeline {
   stages {
     stage('script build') {
       steps {
-        sh '''pipeline {
-    agent any
-    stages {
+        sh '''stages {
         stage(\'Build\') {
             steps {
                 script {
@@ -13,56 +11,39 @@ pipeline {
                     sh \'./scripts/build.sh\'
                 }
             }
-        }
-    }
-}'''
+        }'''
         }
       }
 
       stage('test') {
         steps {
-          sh '''pipeline {
-    agent any
-    stages {
-        stage(\'Test\') {
+          sh '''        stage(\'Test\') {
             steps {
                 script {
                     echo \'Running tests...\'
                     sh \'./scripts/test.sh\'
                 }
             }
-        }
-    }
-}
-'''
+        }'''
           }
         }
 
         stage('build image') {
           steps {
-            sh '''pipeline {
-    agent any
-    stages {
-        stage(\'Build Docker Image\') {
+            sh '''stage(\'Build Docker Image\') {
             steps {
                 script {
                     echo \'Building Docker image...\'
                     sh \'docker build -t mybuildimage .\'
                 }
             }
-        }
-    }
-}
-'''
+        }'''
             }
           }
 
           stage('push') {
             steps {
-              sh '''pipeline {
-    agent any
-    stages {
-        stage(\'Push Docker Image\') {
+              sh '''stage(\'Push Docker Image\') {
             steps {
                 script {
                     echo \'Pushing Docker image to registry...\'
@@ -71,10 +52,7 @@ pipeline {
                     }
                 }
             }
-        }
-    }
-}
-'''
+        }'''
               }
             }
 
