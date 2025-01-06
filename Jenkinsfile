@@ -6,14 +6,37 @@ pipeline {
     }
 
     stages {
+        stage('Verify Workspace and Build Script') {
+            steps {
+                script {
+                    echo 'Checking the workspace and build script...'
+                    sh 'pwd'  // Print the working directory
+                    sh 'ls -l ./scripts'  // List the files in the "scripts" directory
+                }
+            }
+        }
+
+        stage('Verify Jenkins User') {
+            steps {
+                script {
+                    echo 'Checking the Jenkins user...'
+                    sh 'whoami'  // Print the user Jenkins is running as
+                    sh 'ls -l'   // List the files in the current directory to check file access
+                }
+            }
+        }
+
         stage('Build') {
             steps {
                 script {
                     echo 'Building the application...'
-                    sh './scripts/build.sh'
+                    // Make sure the build script has execute permissions
+                    sh 'chmod +x ./scripts/build.sh'
+                    sh './scripts/build.sh'  // Execute the build script
                 }
             }
         }
+
         stage('Test') {
             steps {
                 script {
@@ -22,6 +45,7 @@ pipeline {
                 }
             }
         }
+
         stage('Build Docker Image') {
             steps {
                 script {
@@ -30,6 +54,7 @@ pipeline {
                 }
             }
         }
+
         stage('Push Docker Image') {
             steps {
                 script {
