@@ -52,8 +52,8 @@ pipeline {
             steps {
                 script {
                     echo 'Building Docker image...'
-                    sh "docker build --platform linux/arm64 -t ${DOCKER_USERNAME}/${env.IMAGE_NAME}:${env.BUILD_TAG} ."
-                    sh "docker tag ${DOCKER_USERNAME}/${env.IMAGE_NAME}:${env.BUILD_TAG} ${DOCKER_USERNAME}/${env.IMAGE_NAME}:latest"
+                    sh "docker build --platform linux/arm64 -t azimazing/${env.IMAGE_NAME}:${env.BUILD_TAG} ."
+                    sh "docker tag azimazing/${env.IMAGE_NAME}:${env.BUILD_TAG} azimazing/${env.IMAGE_NAME}:latest"
                 }
             }
         }
@@ -67,12 +67,11 @@ pipeline {
                                                     passwordVariable: 'DOCKER_PASS')]) {
                         sh "echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin"
                         
-                        // Push both tags
-                        sh "docker push ${DOCKER_USERNAME}/${env.IMAGE_NAME}:${env.BUILD_TAG}"
-                        sh "docker push ${DOCKER_USERNAME}/${env.IMAGE_NAME}:latest"
+                        // Push both tags with namespace
+                        sh "docker push azimazing/${env.IMAGE_NAME}:${env.BUILD_TAG}"
+                        sh "docker push azimazing/${env.IMAGE_NAME}:latest"
                         
                         sh 'docker logout'
-                        }
                     }
                 }
             }
