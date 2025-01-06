@@ -62,16 +62,10 @@ pipeline {
             steps {
                 script {
                     echo 'Pushing Docker image to registry...'
-                    withCredentials([usernamePassword(credentialsId: env.DOCKER_CREDENTIALS_ID, 
-                                                    usernameVariable: 'DOCKER_USER', 
-                                                    passwordVariable: 'DOCKER_PASS')]) {
-                        sh "echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin"
-                        
-                        // Push both tags with namespace
-                        sh "docker push azimazing/${env.IMAGE_NAME}:${env.BUILD_TAG}"
-                        sh "docker push azimazing/${env.IMAGE_NAME}:latest"
-                        
-                        sh 'docker logout'
+                    docker.withRegistry('https://registry.hub.docker.com', 'env.DOCKER_CREDENTIALS_ID')  
+                        def app = docker.image('azimazing/${env.IMAGE_NAME}')
+                        app.push("${env.BUILD_NUMBER}")
+                        app.push('latest')
                     }
                 }
             }
