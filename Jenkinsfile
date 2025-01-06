@@ -4,55 +4,55 @@ pipeline {
     stage('script build') {
       steps {
         sh '''stages {
-        stage(\'Build\') {
-            steps {
-                script {
-                    echo \'Building the application...\'
-                    sh \'./scripts/build.sh\'
-                }
-            }
-        }'''
+Â  Â  Â  Â  stage(\'Build\') {
+Â  Â  Â  Â  Â  Â  steps {
+Â  Â  Â  Â  Â  Â  Â  Â  script {
+Â  Â  Â  Â  Â  Â  Â  Â  Â  Â  echo \'Building the application...\'
+Â  Â  Â  Â  Â  Â  Â  Â  Â  Â  sh \'./scripts/build.sh\'
+Â  Â  Â  Â  Â  Â  Â  Â  }
+Â  Â  Â  Â  Â  Â  }
+Â  Â  Â  Â  }'''
         }
       }
 
       stage('test') {
         steps {
-          sh '''        stage(\'Test\') {
-            steps {
-                script {
-                    echo \'Running tests...\'
-                    sh \'./scripts/test.sh\'
-                }
-            }
-        }'''
+          sh '''Â  Â  Â  Â  stage(\'Test\') {
+Â  Â  Â  Â  Â  Â  steps {
+Â  Â  Â  Â  Â  Â  Â  Â  script {
+Â  Â  Â  Â  Â  Â  Â  Â  Â  Â  echo \'Running tests...\'
+Â  Â  Â  Â  Â  Â  Â  Â  Â  Â  sh \'./scripts/test.sh\'
+Â  Â  Â  Â  Â  Â  Â  Â  }
+Â  Â  Â  Â  Â  Â  }
+Â  Â  Â  Â  }'''
           }
         }
 
         stage('build image') {
           steps {
             sh '''stage(\'Build Docker Image\') {
-            steps {
-                script {
-                    echo \'Building Docker image...\'
-                    sh \'docker build -t mybuildimage .\'
-                }
-            }
-        }'''
+Â  Â  Â  Â  Â  Â  steps {
+Â  Â  Â  Â  Â  Â  Â  Â  script {
+Â  Â  Â  Â  Â  Â  Â  Â  Â  Â  echo \'Building Docker image...\'
+Â  Â  Â  Â  Â  Â  Â  Â  Â  Â  sh \'docker build -t mybuildimage .\'
+Â  Â  Â  Â  Â  Â  Â  Â  }
+Â  Â  Â  Â  Â  Â  }
+Â  Â  Â  Â  }'''
             }
           }
 
           stage('push') {
             steps {
               sh '''stage(\'Push Docker Image\') {
-            steps {
-                script {
-                    echo \'Pushing Docker image to registry...\'
-                    docker.withRegistry(\'https://registry.hub.docker.com\', \'docker_hub_creds_id\') {
-                        sh \'docker push mybuildimage:latest\'
-                    }
-                }
-            }
-        }'''
+Â  Â  Â  Â  Â  Â  steps {
+Â  Â  Â  Â  Â  Â  Â  Â  script {
+Â  Â  Â  Â  Â  Â  Â  Â  Â  Â  echo \'Pushing Docker image to registry...\'
+Â  Â  Â  Â  Â  Â  Â  Â  Â  Â  docker.withRegistry(\'https://registry.hub.docker.com\', \'docker_hub_creds_id\') {
+Â  Â  Â  Â  Â  Â  Â  Â  Â  Â  Â  Â  sh \'docker push mybuildimage:latest\'
+Â  Â  Â  Â  Â  Â  Â  Â  Â  Â  }
+Â  Â  Â  Â  Â  Â  Â  Â  }
+Â  Â  Â  Â  Â  Â  }
+Â  Â  Â  Â  }'''
               }
             }
 
