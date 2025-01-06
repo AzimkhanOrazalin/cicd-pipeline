@@ -8,6 +8,7 @@ pipeline {
           sh 'pwd'
           sh 'ls -l ./scripts'
         }
+
       }
     }
 
@@ -18,6 +19,7 @@ pipeline {
           sh 'whoami'
           sh 'ls -l'
         }
+
       }
     }
 
@@ -28,6 +30,7 @@ pipeline {
           sh 'chmod +x ./scripts/build.sh'
           sh './scripts/build.sh'
         }
+
       }
     }
 
@@ -37,6 +40,7 @@ pipeline {
           echo 'Running tests...'
           sh './scripts/test.sh'
         }
+
       }
     }
 
@@ -47,6 +51,7 @@ pipeline {
           sh "docker build --platform linux/arm64 -t azimazing/${env.IMAGE_NAME}:${env.BUILD_TAG} ."
           sh "docker tag azimazing/${env.IMAGE_NAME}:${env.BUILD_TAG} azimazing/${env.IMAGE_NAME}:latest"
         }
+
       }
     }
 
@@ -60,8 +65,10 @@ pipeline {
             app.push('latest')
           }
         }
+
       }
     }
+
   }
   environment {
     IMAGE_NAME = 'testimage'
@@ -82,5 +89,6 @@ pipeline {
       echo 'Cleaning up workspace...'
       cleanWs()
     }
+
   }
 }
