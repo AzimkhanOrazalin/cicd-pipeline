@@ -59,7 +59,7 @@ pipeline {
       steps {
         script {
             echo 'Pushing Docker image to registry...'
-            docker.withRegistry('https://registry.hub.docker.com', bf273b9f-a7af-482c-981d-24d87ad00d25) {
+            docker.withRegistry('https://registry.hub.docker.com', credentials: "${env.DOCKER_CREDENTIALS_ID}"){
                 def app = docker.image("azimazing/${env.IMAGE_NAME}")
                 app.push("${env.BUILD_NUMBER}")
                 app.push('latest')
