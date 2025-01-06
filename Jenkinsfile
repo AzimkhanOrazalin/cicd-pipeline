@@ -52,12 +52,12 @@ pipeline {
             steps {
                 script {
                     echo 'Building Docker image...'
-                    sh "docker build --platform linux/arm64 -t ${env.IMAGE_NAME}:${env.BUILD_TAG} ."
-                    sh "docker tag ${env.IMAGE_NAME}:${env.BUILD_TAG} ${env.IMAGE_NAME}:latest"
+                    sh "docker build --platform linux/arm64 -t ${DOCKER_USERNAME}/${env.IMAGE_NAME}:${env.BUILD_TAG} ."
+                    sh "docker tag ${DOCKER_USERNAME}/${env.IMAGE_NAME}:${env.BUILD_TAG} ${DOCKER_USERNAME}/${env.IMAGE_NAME}:latest"
                 }
             }
         }
-        
+    
         stage('Push Docker Image') {
             steps {
                 script {
@@ -65,20 +65,18 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: env.DOCKER_CREDENTIALS_ID, 
                                                     usernameVariable: 'DOCKER_USER', 
                                                     passwordVariable: 'DOCKER_PASS')]) {
-                        // Login to Docker registry
                         sh "echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin"
                         
                         // Push both tags
-                        sh "docker push ${env.IMAGE_NAME}:${env.BUILD_TAG}"
-                        sh "docker push ${env.IMAGE_NAME}:latest"
+                        sh "docker push ${DOCKER_USERNAME}/${env.IMAGE_NAME}:${env.BUILD_TAG}"
+                        sh "docker push ${DOCKER_USERNAME}/${env.IMAGE_NAME}:latest"
                         
-                        // Logout for security
                         sh 'docker logout'
+                        }
                     }
                 }
             }
         }
-    }
     
     post {
         success {
