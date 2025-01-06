@@ -4,7 +4,8 @@ pipeline {
     environment {
         IMAGE_NAME = 'testimage'
         DOCKER_REGISTRY = 'registry.hub.docker.com'
-        DOCKER_CREDENTIALS = 'bf273b9f-a7af-482c-981d-24d87ad00d25'
+        DOCKER_CREDENTIALS_ID = 'bf273b9f-a7af-482c-981d-24d87ad00d25'
+        BUILD_TAG = "${env.BUILD_NUMBER}"
     }
     
     stages {
@@ -51,7 +52,8 @@ pipeline {
             steps {
                 script {
                     echo 'Building Docker image...'
-                    docker.build("${env.IMAGE_NAME}:${env.BUILD_NUMBER}", '--platform linux/arm64 .')
+                    sh "docker build --platform linux/arm64 -t ${env.IMAGE_NAME}:${env.BUILD_TAG} ."
+                    sh "docker tag ${env.IMAGE_NAME}:${env.BUILD_TAG} ${env.IMAGE_NAME}:latest"
                 }
             }
         }
@@ -60,14 +62,18 @@ pipeline {
             steps {
                 script {
                     echo 'Pushing Docker image to registry...'
-                    docker.withRegistry("https://${env.DOCKER_REGISTRY}", env.DOCKER_CREDENTIALS) {
-                        def dockerImage = docker.image("${env.IMAGE_NAME}:${env.BUILD_NUMBER}")
+                    withCredentials([usernamePassword(credentialsId: env.DOCKER_CREDENTIALS_ID, 
+                                                    usernameVariable: 'DOCKER_USER', 
+                                                    passwordVariable: 'DOCKER_PASS')]) {
+                        // Login to Docker registry
+                        sh "echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin"
                         
-                        // Push the build-numbered tag
-                        dockerImage.push()
+                        // Push both tags
+                        sh "docker push ${env.IMAGE_NAME}:${env.BUILD_TAG}"
+                        sh "docker push ${env.IMAGE_NAME}:latest"
                         
-                        // Push the latest tag
-                        dockerImage.push('latest')
+                        // Logout for security
+                        sh 'docker logout'
                     }
                 }
             }
